@@ -4,7 +4,7 @@ import os
 import re
 import numpy
 import pytesseract
-import tkinter
+from Tkinter import mainloop, Tk, Label, Entry, Button, W
 
 from PIL import Image
 from scipy.misc import imsave
@@ -80,3 +80,20 @@ if __name__ == '__main__':
 
     #top = tkinter.Tk()
     #top.mainloop()
+
+    master = Tk()
+    Label(master, text="Nombre del directorio").grid(row=0)
+
+    user_input = Entry(master)
+    user_input.grid(row=0, column=1)
+
+    Button(master, text='Cerrar', command=master.quit).grid(row=3,
+                                                            column=0,
+                                                            sticky=W,
+                                                            pady=4)
+    Button(master, text='Leer imagenes', command=run).grid(row=3,
+                                                           column=1,
+                                                           sticky=W,
+                                                           pady=4)
+
+    mainloop()
