@@ -1,9 +1,19 @@
+# !/usr/bin/env python
+
 import os
 import re
 import numpy
 import pytesseract
+import tkinter
+
 from PIL import Image
 from scipy.misc import imsave
+
+
+FOLDER = 'images'
+THRESHOLDS = [30, 20, 40, 50, 70, 100, 120]
+AREA = (200, 110, 300, 170)
+VALUES = []
 
 
 def binarize_image(image, threshold):
@@ -26,36 +36,47 @@ def binarize_array(numpy_array, threshold=100):
     return numpy_array
 
 
-folder = 'images'
-thresholds = [30, 20, 40, 50, 70, 100, 120]
-area = (200, 110, 300, 170)
-values = []
+def run():
+    with open('output.txt', 'w') as output_file:
 
-with open('output.txt', 'w') as output_file:
+        image_files = sorted(os.listdir(FOLDER))[0: 20]
 
-    image_files = sorted(os.listdir(folder))[0: 20]
+        for image_name in image_files:
+            img = Image.open(os.path.join(FOLDER, image_name))
+            cropped_img = img.crop(AREA)
 
-    for image_name in image_files:
-        img = Image.open(os.path.join(folder, image_name))
-        cropped_img = img.crop(area)
+            value = ''
+            for t in THRESHOLDS:
+                cropped_img = binarize_image(cropped_img, t)
+                text = pytesseract.image_to_string(cropped_img)
 
-        value = ''
-        for t in thresholds:
-            cropped_img = binarize_image(cropped_img, t)
-            text = pytesseract.image_to_string(cropped_img)
+                floats = re.findall(r'\d+[,|\.]\d+', text)
 
-            floats = re.findall(r'\d+[,|\.]\d+', text)
+                if len(floats) > 0:
+                    value = float(floats[0].replace(',', '.'))
+                    if len(VALUES) > 0:
+                        #std = numpy.std(values)
+                        #avg = numpy.average(values)
+                        #if std == 0 or (avg + std*2 > value > avg - std*2):
+                        VALUES.append(value)
+                        #    break
+                    else:
+                        VALUES.append(value)
+                        break
 
-            if len(floats) > 0:
-                value = float(floats[0].replace(',', '.'))
-                if len(values) > 0:
-                    #std = numpy.std(values)
-                    #avg = numpy.average(values)
-                    #if std == 0 or (avg + std*2 > value > avg - std*2):
-                    values.append(value)
-                    #    break
-                else:
-                    values.append(value)
-                    break
+            output_file.write(str(value) + '\n')
 
-        output_file.write(str(value) + '\n')
+
+if __name__ == '__main__':
+    pass
+    #run()
+
+    #import wx
+    #app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
+    #frame = wx.Frame(None, wx.ID_ANY, "Hello World")  # A Frame is a top-level window.
+    #frame.Show(True)  # Show the frame.
+    #app.MainLoop()
+
+
+    #top = tkinter.Tk()
+    #top.mainloop()
