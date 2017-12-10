@@ -1,9 +1,10 @@
 # !/usr/bin/env python
 import os
 import re
+import wx
 import numpy
 import pytesseract
-from tkinter import mainloop, Tk, Entry, Button, W
+#from tkinter import mainloop, Tk, Entry, Button, W
 
 from PIL import Image
 from scipy.misc import imsave
@@ -38,7 +39,7 @@ def binarize_array(numpy_array, threshold=100):
 def run():
     with open('output.txt', 'w') as output_file:
 
-        image_files = sorted(os.listdir(FOLDER))[0: 20]
+        image_files = sorted(os.listdir(FOLDER))[0: 5]
 
         for image_name in image_files:
             img = Image.open(os.path.join(FOLDER, image_name))
@@ -66,21 +67,27 @@ def run():
             output_file.write(str(value) + '\n')
 
 
+class MyForm(wx.Frame):
+    def __init__(self):
+        wx.Frame.__init__(self, None, wx.ID_ANY, "Button Tutorial")
+        panel = wx.Panel(self, wx.ID_ANY)
+
+        button = wx.Button(panel, id=wx.ID_ANY, label="Press Me")
+        button.Bind(wx.EVT_BUTTON, self.onButton)
+        # self.Bind(wx.EVT_BUTTON, self.onButton, button)
+
+    # ----------------------------------------------------------------------
+    def onButton(self, event):
+        """
+        This method is fired when its corresponding button is pressed
+        """
+        run()
+
+
 if __name__ == '__main__':
-    pass
-    #run()
 
-    #import wx
-    #app = wx.App(False)  # Create a new app, don't redirect stdout/stderr to a window.
-    #frame = wx.Frame(None, wx.ID_ANY, "Hello World")  # A Frame is a top-level window.
-    #frame.Show(True)  # Show the frame.
-    #app.MainLoop()
-
-
-    #top = tkinter.Tk()
-    #top.mainloop()
-
-    master = Tk()
+    # With Tkinter
+    """master = Tk()
 
     user_input = Entry(master)
     user_input.grid(row=0, column=1)
@@ -90,4 +97,10 @@ if __name__ == '__main__':
                                                            sticky=W,
                                                            pady=4)
 
-    mainloop()
+    mainloop()"""
+
+    # With wxPython
+    app = wx.App(False)
+    frame = MyForm()
+    frame.Show()
+    app.MainLoop()
