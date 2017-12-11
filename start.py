@@ -69,18 +69,31 @@ def run():
 
 class MyForm(wx.Frame):
     def __init__(self):
-        wx.Frame.__init__(self, None, wx.ID_ANY, "Button Tutorial")
+        wx.Frame.__init__(self, None, wx.ID_ANY, "Lectura de imagenes automática")
         panel = wx.Panel(self, wx.ID_ANY)
 
-        button = wx.Button(panel, id=wx.ID_ANY, label="Press Me")
-        button.Bind(wx.EVT_BUTTON, self.onButton)
-        # self.Bind(wx.EVT_BUTTON, self.onButton, button)
+        #self.lblname = wx.StaticText(self, label="Coordenadas(x, y) de esquina superior izquierda :", pos=(0, 0))
+        #coordinate_1_txt = wx.StaticText(self, label="Coordenadas(x, y) de esquina superior izquierda :", pos=(0, 0))
 
-    # ----------------------------------------------------------------------
+        button = wx.Button(panel, id=wx.ID_ANY, label="Leer", pos=(100, 100))
+        button.Bind(wx.EVT_BUTTON, self.onButton)
+
+        #buttons = [button, coordinate_1_txt]
+
+        #for button in buttons:
+        #    self.buildButtons(button, sizer)
+
+        #panel.SetSizer(sizer)
+
+        #self.GetSizer().Layout()
+        #self.GetParent().Layout()    # container layout
+
     def onButton(self, event):
         """
         This method is fired when its corresponding button is pressed
         """
+        #self.GetSizer().Layout()
+        #self.GetParent().Layout()    # container layout
         run()
 
 
