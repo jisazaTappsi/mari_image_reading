@@ -4,7 +4,6 @@ import re
 import wx
 import numpy
 import pytesseract
-#from tkinter import mainloop, Tk, Entry, Button, W
 
 from PIL import Image
 from scipy.misc import imsave
@@ -12,7 +11,7 @@ from scipy.misc import imsave
 
 FOLDER = 'images'
 THRESHOLDS = [30, 20, 40, 50, 70, 100, 120]
-AREA = (200, 110, 300, 170)
+area = [200, 110, 300, 170]
 VALUES = []
 
 
@@ -43,7 +42,7 @@ def run():
 
         for image_name in image_files:
             img = Image.open(os.path.join(FOLDER, image_name))
-            cropped_img = img.crop(AREA)
+            cropped_img = img.crop(area)
 
             value = ''
             for t in THRESHOLDS:
@@ -72,45 +71,49 @@ class MyForm(wx.Frame):
         wx.Frame.__init__(self, None, wx.ID_ANY, "Lectura de imagenes automática")
         panel = wx.Panel(self, wx.ID_ANY)
 
-        #self.lblname = wx.StaticText(self, label="Coordenadas(x, y) de esquina superior izquierda :", pos=(0, 0))
-        #coordinate_1_txt = wx.StaticText(self, label="Coordenadas(x, y) de esquina superior izquierda :", pos=(0, 0))
+        self.text0 = wx.TextCtrl(panel, value="200", pos=(20, 30))
+        self.text1 = wx.TextCtrl(panel, value="110", pos=(150, 30))
+        self.text2 = wx.TextCtrl(panel, value="300", pos=(20, 90))
+        self.text3 = wx.TextCtrl(panel, value="170", pos=(150, 90))
 
-        button = wx.Button(panel, id=wx.ID_ANY, label="Leer", pos=(100, 100))
-        button.Bind(wx.EVT_BUTTON, self.onButton)
+        self.Bind(wx.EVT_TEXT, self.on_x_coordinate0, self.text0)
+        self.Bind(wx.EVT_TEXT, self.on_x_coordinate1, self.text1)
+        self.Bind(wx.EVT_TEXT, self.on_x_coordinate2, self.text2)
+        self.Bind(wx.EVT_TEXT, self.on_x_coordinate3, self.text3)
 
-        #buttons = [button, coordinate_1_txt]
+        read_button = wx.Button(panel, id=wx.ID_ANY, label="Leer")
+        read_button.Bind(wx.EVT_BUTTON, self.onButton)
 
-        #for button in buttons:
-        #    self.buildButtons(button, sizer)
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(read_button, 150, wx.ALL, 150)
+        panel.SetSizer(sizer)
 
-        #panel.SetSizer(sizer)
+        self.Show(True)
 
-        #self.GetSizer().Layout()
-        #self.GetParent().Layout()    # container layout
+    def change_area(self, coordinate_num, value):
+        area[coordinate_num] = int(value)
+        print(area)
+
+    def on_x_coordinate0(self, event):
+        self.change_area(0, self.text0.GetValue())
+
+    def on_x_coordinate1(self, event):
+        self.change_area(1, self.text1.GetValue())
+
+    def on_x_coordinate2(self, event):
+        self.change_area(2, self.text2.GetValue())
+
+    def on_x_coordinate3(self, event):
+        self.change_area(3, self.text3.GetValue())
 
     def onButton(self, event):
         """
         This method is fired when its corresponding button is pressed
         """
-        #self.GetSizer().Layout()
-        #self.GetParent().Layout()    # container layout
         run()
 
 
 if __name__ == '__main__':
-
-    # With Tkinter
-    """master = Tk()
-
-    user_input = Entry(master)
-    user_input.grid(row=0, column=1)
-
-    Button(master, text='Leer imagenes', command=run).grid(row=3,
-                                                           column=1,
-                                                           sticky=W,
-                                                           pady=4)
-
-    mainloop()"""
 
     # With wxPython
     app = wx.App(False)
