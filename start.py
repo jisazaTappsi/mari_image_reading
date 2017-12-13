@@ -38,7 +38,7 @@ def binarize_array(numpy_array, threshold=100):
 def run():
     with open('output.txt', 'w') as output_file:
 
-        image_files = sorted(os.listdir(FOLDER))[0: 5]
+        image_files = sorted(os.listdir(FOLDER))
 
         for image_name in image_files:
             img = Image.open(os.path.join(FOLDER, image_name))
