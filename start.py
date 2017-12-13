@@ -15,8 +15,11 @@ VALUES = []
 
 
 def get_image_coordinates():
-    with open('image_coordinates') as f:
-        return [int(i) for i in f.read().split(',')]
+    try:
+        with open('image_coordinates') as f:
+            return [int(i) for i in f.read().split(',')]
+    except FileNotFoundError:
+        return [230, 130, 300, 170]
 
 
 area = get_image_coordinates()
