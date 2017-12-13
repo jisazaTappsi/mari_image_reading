@@ -11,8 +11,20 @@ from scipy.misc import imsave
 
 FOLDER = 'images'
 THRESHOLDS = [30, 20, 40, 50, 70, 100, 120]
-area = [200, 110, 300, 170]
 VALUES = []
+
+
+def get_image_coordinates():
+    with open('image_coordinates') as f:
+        return [int(i) for i in f.read().split(',')]
+
+
+area = get_image_coordinates()
+
+
+def set_image_coordinates(area):
+    with open('image_coordinates', 'w') as f:
+        f.write(', '.join([str(i) for i in area]))
 
 
 def binarize_image(image, threshold):
@@ -71,10 +83,10 @@ class MyForm(wx.Frame):
         wx.Frame.__init__(self, None, wx.ID_ANY, "Lectura de imagenes automática")
         panel = wx.Panel(self, wx.ID_ANY)
 
-        self.text0 = wx.TextCtrl(panel, value="200", pos=(20, 30))
-        self.text1 = wx.TextCtrl(panel, value="110", pos=(150, 30))
-        self.text2 = wx.TextCtrl(panel, value="300", pos=(20, 90))
-        self.text3 = wx.TextCtrl(panel, value="170", pos=(150, 90))
+        self.text0 = wx.TextCtrl(panel, value=str(area[0]), pos=(20, 30))
+        self.text1 = wx.TextCtrl(panel, value=str(area[1]), pos=(150, 30))
+        self.text2 = wx.TextCtrl(panel, value=str(area[2]), pos=(20, 90))
+        self.text3 = wx.TextCtrl(panel, value=str(area[3]), pos=(150, 90))
 
         self.Bind(wx.EVT_TEXT, self.on_x_coordinate0, self.text0)
         self.Bind(wx.EVT_TEXT, self.on_x_coordinate1, self.text1)
@@ -92,7 +104,7 @@ class MyForm(wx.Frame):
 
     def change_area(self, coordinate_num, value):
         area[coordinate_num] = int(value)
-        print(area)
+        set_image_coordinates(area)
 
     def on_x_coordinate0(self, event):
         self.change_area(0, self.text0.GetValue())
