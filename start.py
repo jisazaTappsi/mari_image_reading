@@ -25,10 +25,6 @@ def set_threshold(value):
         if value != '':
             f.write(str(value))
 
-#THRESHOLDS = [40, 88, 50, 70, 100, 120]
-THRESHOLDS = [get_threshold()]
-#start_threshold = 128
-
 VALUES = []
 
 
@@ -101,15 +97,15 @@ def run():
 
             cropped_img.save('cropped_image.jpg')
             value = ''
-            for t in THRESHOLDS:
-                binarized_img = binarize_image(cropped_img, t)
-                text = pytesseract.image_to_string(binarized_img)
 
-                floats = re.findall(r'\d+[,|\.]\d+', text)
+            threshold = get_threshold()
+            binarized_img = binarize_image(cropped_img, threshold)
+            text = pytesseract.image_to_string(binarized_img)
 
-                if len(floats) > 0:
-                    value = float(floats[0].replace(',', '.'))
-                    break
+            floats = re.findall(r'\d+[,|\.]\d+', text)
+
+            if len(floats) > 0:
+                value = float(floats[0].replace(',', '.'))
 
             # tries with the cropped image
             if value == '':
@@ -132,7 +128,7 @@ class MyForm(wx.Frame):
         self.text1 = wx.TextCtrl(panel, value=str(area[1]), pos=(150, 30))
         self.text2 = wx.TextCtrl(panel, value=str(area[2]), pos=(20, 90))
         self.text3 = wx.TextCtrl(panel, value=str(area[3]), pos=(150, 90))
-        self.text_threshold = wx.TextCtrl(panel, value=str(THRESHOLDS[0]), pos=(20, 150))
+        self.text_threshold = wx.TextCtrl(panel, value=str(get_threshold()), pos=(20, 150))
 
         self.Bind(wx.EVT_TEXT, self.on_x_coordinate0, self.text0)
         self.Bind(wx.EVT_TEXT, self.on_x_coordinate1, self.text1)
