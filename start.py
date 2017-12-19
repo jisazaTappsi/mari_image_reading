@@ -10,7 +10,25 @@ from scipy.misc import imsave
 
 
 FOLDER = 'images'
-THRESHOLDS = [30, 20, 40, 50, 70, 100, 120]
+
+
+def get_threshold():
+    try:
+        with open('threshold') as f:
+            return int(f.read())
+    except FileNotFoundError:
+        return 40
+
+
+def set_threshold(value):
+    with open('threshold', 'w') as f:
+        if value != '':
+            f.write(str(value))
+
+#THRESHOLDS = [40, 88, 50, 70, 100, 120]
+THRESHOLDS = [get_threshold()]
+#start_threshold = 128
+
 VALUES = []
 
 
@@ -27,7 +45,8 @@ area = get_image_coordinates()
 
 def set_image_coordinates(area):
     with open('image_coordinates', 'w') as f:
-        f.write(', '.join([str(i) for i in area]))
+        if all([i != '' for i in area]):
+            f.write(', '.join([str(i) for i in area]))
 
 
 def binarize_image(image, threshold):
@@ -35,8 +54,10 @@ def binarize_image(image, threshold):
     image = image.convert('L')  # convert image to monochrome
     image = numpy.array(image)
     arrays = binarize_array(image, threshold)
-    imsave('tmp_img.jpg', arrays)
-    return Image.open('tmp_img.jpg')
+    #min_value = min([min(a) for a in arrays])
+    #max_value = max([max(a) for a in arrays])
+    imsave('binarized_image.jpg', arrays)
+    return Image.open('binarized_image.jpg')#, min_value, max_value
 
 
 def binarize_array(numpy_array, threshold=100):
@@ -50,6 +71,25 @@ def binarize_array(numpy_array, threshold=100):
     return numpy_array
 
 
+"""
+def bin_search(cropped_img, my_threshold, min_search, max_search):
+
+    cropped_img, min_value, max_value = binarize_image(cropped_img, my_threshold)
+
+    text = pytesseract.image_to_string(cropped_img)
+
+    floats = re.findall(r'\d+[,|\.]\d+', text)
+
+    if len(floats) > 0:
+        return float(floats[0].replace(',', '.'))
+
+    if :
+        bin_search(cropped_img, my_threshold, min_search, max_search)
+    else:
+        bin_search(cropped_img, my_threshold, min_search, max_search)
+"""
+
+
 def run():
     with open('output.txt', 'w') as output_file:
 
@@ -59,24 +99,26 @@ def run():
             img = Image.open(os.path.join(FOLDER, image_name))
             cropped_img = img.crop(area)
 
+            cropped_img.save('cropped_image.jpg')
             value = ''
             for t in THRESHOLDS:
-                cropped_img = binarize_image(cropped_img, t)
+                binarized_img = binarize_image(cropped_img, t)
+                text = pytesseract.image_to_string(binarized_img)
+
+                floats = re.findall(r'\d+[,|\.]\d+', text)
+
+                if len(floats) > 0:
+                    value = float(floats[0].replace(',', '.'))
+                    break
+
+            # tries with the cropped image
+            if value == '':
                 text = pytesseract.image_to_string(cropped_img)
 
                 floats = re.findall(r'\d+[,|\.]\d+', text)
 
                 if len(floats) > 0:
                     value = float(floats[0].replace(',', '.'))
-                    if len(VALUES) > 0:
-                        #std = numpy.std(values)
-                        #avg = numpy.average(values)
-                        #if std == 0 or (avg + std*2 > value > avg - std*2):
-                        VALUES.append(value)
-                        #    break
-                    else:
-                        VALUES.append(value)
-                        break
 
             output_file.write(str(value) + '\n')
 
@@ -90,24 +132,35 @@ class MyForm(wx.Frame):
         self.text1 = wx.TextCtrl(panel, value=str(area[1]), pos=(150, 30))
         self.text2 = wx.TextCtrl(panel, value=str(area[2]), pos=(20, 90))
         self.text3 = wx.TextCtrl(panel, value=str(area[3]), pos=(150, 90))
+        self.text_threshold = wx.TextCtrl(panel, value=str(THRESHOLDS[0]), pos=(20, 150))
 
         self.Bind(wx.EVT_TEXT, self.on_x_coordinate0, self.text0)
         self.Bind(wx.EVT_TEXT, self.on_x_coordinate1, self.text1)
         self.Bind(wx.EVT_TEXT, self.on_x_coordinate2, self.text2)
         self.Bind(wx.EVT_TEXT, self.on_x_coordinate3, self.text3)
+        self.Bind(wx.EVT_TEXT, self.on_threshold, self.text_threshold)
 
         read_button = wx.Button(panel, id=wx.ID_ANY, label="Leer")
         read_button.Bind(wx.EVT_BUTTON, self.onButton)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(read_button, 150, wx.ALL, 150)
+        sizer.Add(read_button, 100, wx.ALL, 200)
         panel.SetSizer(sizer)
 
         self.Show(True)
 
     def change_area(self, coordinate_num, value):
-        area[coordinate_num] = int(value)
-        set_image_coordinates(area)
+        try:
+            area[coordinate_num] = int(value)
+            set_image_coordinates(area)
+        except ValueError:
+            pass
+
+    def change_threshold(self, value):
+        try:
+            set_threshold(int(value))
+        except ValueError:
+            pass
 
     def on_x_coordinate0(self, event):
         self.change_area(0, self.text0.GetValue())
@@ -120,6 +173,9 @@ class MyForm(wx.Frame):
 
     def on_x_coordinate3(self, event):
         self.change_area(3, self.text3.GetValue())
+
+    def on_threshold(self, event):
+        self.change_threshold(self.text_threshold.GetValue())
 
     def onButton(self, event):
         """
